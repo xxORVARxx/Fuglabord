@@ -1,0 +1,809 @@
+https://www.olivieraubert.net/vlc/python-ctypes/doc/
+sudo pip3 install python-vlc
+
+March 2020
+
+
+
+
+Example:
+
+Import the VLC module:
+  import vlc
+
+Create a Media Player Object:
+  player = vlc.MediaPlayer("/path/to/file.mp3")
+  
+Using some of it's methods:
+  player.play()
+  player.pause()
+  player.stop()
+  player.audio_set_volume(50)
+
+
+  
+  
+Class: MediaPlayer:
+List of all the methods: (March 2020)
+
+set_mrl(self, mrl, *options)
+  Set the MRL to play.
+    Warning: most audio and video options, such as text renderer, have no effects on an individual media. These options must be set at the vlc.Instance or vlc.MediaPlayer instanciation.
+  Parameters:
+    mrl - The MRL
+    options - optional media option=value strings
+  Returns:
+    the Media object
+
+
+get_full_title_descriptions(self)
+    Get the full description of available titles.
+  Returns:
+    the titles list
+  
+
+get_full_chapter_descriptions(self, i_chapters_of_title)
+    Get the full description of available chapters.
+  Parameters:
+    i_chapters_of_title - index of the title to query for chapters (uses current title if set to -1).
+  Returns:
+    the chapters list
+
+
+video_get_size(self, num=0)
+    Get the video size in pixels as 2-tuple (width, height).
+  Parameters:
+    num - video number (default 0).
+
+    
+set_hwnd(self, drawable)
+    Set a Win32/Win64 API window handle (HWND).
+    Specify where the media player should render its video output. If LibVLC was built without Win32/Win64 API output support, then this has no effects.
+  Parameters:
+    drawable - windows handle of the drawable.
+    
+video_get_width(self, num=0)
+    Get the width of a video in pixels.
+  Parameters:
+    num - video number (default 0).
+
+
+video_get_height(self, num=0)
+    Get the height of a video in pixels.
+  Parameters:
+    num - video number (default 0).
+
+
+video_get_cursor(self, num=0)
+    Get the mouse pointer coordinates over a video as 2-tuple (x, y).
+    Coordinates are expressed in terms of the decoded video resolution, not in terms of pixels on the screen/viewport. To get the latter, you must query your windowing system directly.
+    Either coordinate may be negative or larger than the corresponding size of the video, if the cursor is outside the rendering area.
+  Parameters:
+    num - video number (default 0).
+  Warning: The coordinates may be out-of-date if the pointer is not located on the video rendering area. LibVLC does not track the mouse pointer if the latter is outside the video widget.
+  Note: LibVLC does not support multiple mouse pointers (but does support multiple input devices sharing the same pointer).
+
+  
+get_fps(self)
+    Get movie fps rate This function is provided for backward compatibility. It cannot deal with multiple video tracks. In LibVLC versions prior to 3.0, it would also fail if the file format did not convey the frame rate explicitly. \deprecated Consider using media_tracks_get() instead.
+  Returns:
+    frames per second (fps) for this playing movie, or 0 if unspecified.
+
+    
+video_get_title_description(self)
+    Get the description of available titles.
+  Returns:
+    list containing description of available titles. It must be freed with track_description_list_release().
+
+    
+video_get_chapter_description(self, i_title)
+    Get the description of available chapters for specific title.
+  Parameters:
+    i_title - selected title.
+  Returns:
+    list containing description of available chapter for title i_title. It must be freed with track_description_list_release().
+
+    
+video_set_subtitle_file(self, psz_subtitle)
+    Set new video subtitle file. \deprecated Use add_slave() instead.
+  Parameters:
+    psz_subtitle - new video subtitle file.
+  Returns:
+    the success status (boolean).
+
+    
+toggle_teletext(self)
+    Toggle teletext transparent status on video output. \deprecated use video_set_teletext() instead.
+
+
+release(self)
+    Release a media_player after use Decrement the reference count of a media player object. If the reference count is 0, then release() will release the media player object. If the media player object has been released, then it should not be used again.
+
+
+retain(self)
+    Retain a reference to a media player object. Use release() to decrement reference count.
+
+
+set_media(self, p_md)
+    Set the media that will be used by the media_player. If any, previous md will be released.
+  Parameters:
+    p_md - the Media. Afterwards the p_md can be safely destroyed.
+
+    
+get_media(self)
+    Get the media used by the media_player.
+  Returns:
+    the media associated with p_mi, or None if no media is associated.
+
+    
+event_manager(self)
+    Decorator. Caches a parameterless method's return value each time it is called.
+    If called later with the same arguments, the cached value is returned (not reevaluated). Adapted from https://wiki.python.org/moin/PythonDecoratorLibrary
+  Decorators:
+    @memoize_parameterless
+
+    
+is_playing(self)
+    is_playing.
+  Returns:
+    1 if the media player is playing, 0 otherwise \libvlc_return_bool.
+
+    
+play(self)
+    Play.
+  Returns:
+    0 if playback started (and was already started), or -1 on error.
+
+    
+set_pause(self, do_pause)
+    Pause or resume (no effect if there is no media).
+  Parameters:
+    do_pause - play/resume if zero, pause if non-zero.
+
+
+set_renderer(self, p_item)
+    Set a renderer to the media player
+  Parameters:
+    p_item - an item discovered by renderer_discoverer_start().
+  Returns:
+    0 on success, -1 on error.
+  Note: must be called before the first call of play() to take effect. See renderer_discoverer_new.
+
+
+video_set_callbacks(self, lock, unlock, display, opaque)
+    Set callbacks and private data to render decoded video to a custom area in memory. Use L{video_set_format}() or L{video_set_format_callbacks}() to configure the decoded format. @warning: Rendering video into custom memory buffers is considerably less efficient than rendering in a custom window as normal. For optimal perfomances, VLC media player renders into a custom window, and does not use this function and associated callbacks. It is B{highly recommended} that other LibVLC-based application do likewise. To embed video in a window, use libvlc_media_player_set_xid() or equivalent depending on the operating system. If window embedding does not fit the application use case, then a custom LibVLC video output display plugin is required to maintain optimal video rendering performances. The following limitations affect performance:
+      - Hardware video decoding acceleration will either be disabled completely, or require (relatively slow) copy from video/DSP memory to main memory.
+      - Sub-pictures (subtitles, on-screen display, etc.) must be blent into the main picture by the CPU instead of the GPU.
+      - Depending on the video format, pixel format conversion, picture scaling, cropping and/or picture re-orientation, must be performed by the CPU instead of the GPU.
+      - Memory copying is required between LibVLC reference picture buffers and application buffers (between lock and unlock callbacks).
+    @param lock: callback to lock video memory (must not be None).
+    @param unlock: callback to unlock video memory (or None if not needed).
+    @param display: callback to display video (or None if not needed).
+    @param opaque: private pointer for the three callbacks (as first parameter).
+    @version: LibVLC 1.1.1 or later.
+
+
+video_set_format(self, chroma, width, height, pitch)
+    Set decoded video chroma and dimensions. This only works in combination with video_set_callbacks(), and is mutually exclusive with video_set_format_callbacks().
+  Parameters:
+    chroma - a four-characters string identifying the chroma (e.g. "RV32" or "YUYV").
+    width - pixel width.
+    height - pixel height.
+    pitch - line pitch (in bytes).
+  Bug: All pixel planes are expected to have the same pitch. To use the YCbCr color space with chrominance subsampling, consider using video_set_format_callbacks() instead.
+
+  
+video_set_format_callbacks(self, setup, cleanup)
+    Set decoded video chroma and dimensions. This only works in combination with video_set_callbacks().
+  Parameters:
+    setup - callback to select the video format (cannot be None).
+    cleanup - callback to release any allocated resources (or None).
+    
+
+set_nsobject(self, drawable)
+    Set the NSView handler where the media player should render its video output. Use the vout called "macosx". The drawable is an NSObject that follow the VLCOpenGLVideoViewEmbedding protocol:
+      @code.m
+      \@protocol VLCOpenGLVideoViewEmbedding <NSObject>
+      - (void)addVoutSubview:(NSView *)view;
+      - (void)removeVoutSubview:(NSView *)view;
+      \@end
+      @endcode
+    Or it can be an NSView object. If you want to use it along with Qt see the QMacCocoaViewContainer. Then the following code should work:
+      @code.mm
+          NSView *video = [[NSView alloc] init];
+          QMacCocoaViewContainer *container = new QMacCocoaViewContainer(video, parent);
+          L{set_nsobject}(mp, video);
+          [video release];
+      @endcode
+    You can find a live example in VLCVideoView in VLCKit.framework.
+    @param drawable: the drawable that is either an NSView or an object following the VLCOpenGLVideoViewEmbedding protocol.
+
+    
+get_nsobject(self)
+    Get the NSView handler previously set with set_nsobject().
+  Returns:
+    the NSView handler or 0 if none where set.
+
+    
+set_xwindow(self, drawable)
+    Set an X Window System drawable where the media player should render its video output. The call takes effect when the playback starts. If it is already started, it might need to be stopped before changes apply. If LibVLC was built without X11 output support, then this function has no effects. By default, LibVLC will capture input events on the video rendering area. Use video_set_mouse_input() and video_set_key_input() to disable that and deliver events to the parent window / to the application instead. By design, the X11 protocol delivers input events to only one recipient. @warning The application must call the XInitThreads() function from Xlib before new(), and before any call to XOpenDisplay() directly or via any other library. Failure to call XInitThreads() will seriously impede LibVLC performance. Calling XOpenDisplay() before XInitThreads() will eventually crash the process. That is a limitation of Xlib.
+  Parameters:
+    drawable - X11 window ID @note The specified identifier must correspond to an existing Input/Output class X11 window. Pixmaps are not currently supported. The default X11 server is assumed, i.e. that specified in the DISPLAY environment variable. @warning LibVLC can deal with invalid X11 handle errors, however some display drivers (EGL, GLX, VA and/or VDPAU) can unfortunately not. Thus the window handle must remain valid until playback is stopped, otherwise the process may abort or crash. @bug No more than one window handle per media player instance can be specified. If the media has multiple simultaneously active video tracks, extra tracks will be rendered into external windows beyond the control of the application.
+
+    
+get_xwindow(self)
+    Get the X Window System window identifier previously set with set_xwindow(). Note that this will return the identifier even if VLC is not currently using it (for instance if it is playing an audio-only input).
+  Returns:
+    an X window ID, or 0 if none where set.
+
+    
+get_hwnd(self)
+    Get the Windows API window handle (HWND) previously set with set_hwnd(). The handle will be returned even if LibVLC is not currently outputting any video to it.
+  Returns:
+    a window handle or None if there are none.
+
+    
+set_android_context(self, p_awindow_handler)
+    Set the android context.
+  Parameters:
+    p_awindow_handler - org.videolan.libvlc.AWindow jobject owned by the org.videolan.libvlc.MediaPlayer class from the libvlc-android project.
+
+
+set_evas_object(self, p_evas_object)
+    Set the EFL Evas Object.
+  Parameters:
+    p_evas_object - a valid EFL Evas Object (Evas_Object).
+  Returns:
+    -1 if an error was detected, 0 otherwise.
+
+
+audio_set_callbacks(self, play, pause, resume, flush, drain, opaque)
+    Sets callbacks and private data for decoded audio. Use audio_set_format() or audio_set_format_callbacks() to configure the decoded audio format.
+  Parameters:
+    play - callback to play audio samples (must not be None).
+    pause - callback to pause playback (or None to ignore).
+    resume - callback to resume playback (or None to ignore).
+    flush - callback to flush audio buffers (or None to ignore).
+    drain - callback to drain audio buffers (or None to ignore).
+    opaque - private pointer for the audio callbacks (as first parameter).
+  Note: The audio callbacks override any other audio output mechanism. If the callbacks are set, LibVLC will not output audio in any way.
+
+
+audio_set_volume_callback(self, set_volume)
+    Set callbacks and private data for decoded audio. This only works in combination with audio_set_callbacks(). Use audio_set_format() or audio_set_format_callbacks() to configure the decoded audio format.
+  Parameters:
+    set_volume - callback to apply audio volume, or None to apply volume in software.
+
+
+audio_set_format_callbacks(self, setup, cleanup)
+    Sets decoded audio format via callbacks. This only works in combination with audio_set_callbacks().
+  Parameters:
+    setup - callback to select the audio format (cannot be None).
+    cleanup - callback to release any allocated resources (or None).
+
+
+audio_set_format(self, format, rate, channels)
+    Sets a fixed decoded audio format. This only works in combination with audio_set_callbacks(), and is mutually exclusive with audio_set_format_callbacks().
+  Parameters:
+    format - a four-characters string identifying the sample format (e.g. "S16N" or "f32l").
+    rate - sample rate (expressed in Hz).
+    channels - channels count.
+
+
+get_length(self)
+    Get the current movie length (in ms).
+  Returns:
+    the movie length (in ms), or -1 if there is no media.
+
+    
+get_time(self)
+    Get the current movie time (in ms).
+  Returns:
+    the movie time (in ms), or -1 if there is no media.
+
+    
+set_time(self, i_time)
+    Set the movie time (in ms). This has no effect if no media is being played. Not all formats and protocols support this.
+  Parameters:
+    i_time - the movie time (in ms).
+
+    
+get_position(self)
+    Get movie position as percentage between 0.0 and 1.0.
+  Returns:
+    movie position, or -1. in case of error.
+
+    
+set_position(self, f_pos)
+Set movie position as percentage between 0.0 and 1.0. This has no effect if playback is not enabled. This might not work depending on the underlying input format and protocol.
+Parameters:
+f_pos - the position.
+
+
+set_chapter(self, i_chapter)
+Set movie chapter (if applicable).
+Parameters:
+i_chapter - chapter number to play.
+
+
+get_chapter(self)
+Get movie chapter.
+Returns:
+chapter number currently playing, or -1 if there is no media.
+
+
+get_chapter_count(self)
+Get movie chapter count.
+Returns:
+number of chapters in movie, or -1.
+
+
+will_play(self)
+Is the player able to play.
+Returns:
+boolean \libvlc_return_bool.
+
+
+get_chapter_count_for_title(self, i_title)
+Get title chapter count.
+Parameters:
+i_title - title.
+Returns:
+number of chapters in title, or -1.
+
+
+set_title(self, i_title)
+Set movie title.
+Parameters:
+i_title - title number to play.
+
+
+get_title(self)
+Get movie title.
+Returns:
+title number currently playing, or -1.
+
+
+get_title_count(self)
+Get movie title count.
+Returns:
+title number count, or -1.
+
+
+get_rate(self)
+Get the requested movie play rate.
+Returns:
+movie play rate.
+Warning: Depending on the underlying media, the requested rate may be different from the real playback rate.
+
+
+set_rate(self, rate)
+Set movie play rate.
+Parameters:
+rate - movie play rate to set.
+Returns:
+-1 if an error was detected, 0 otherwise (but even then, it might not actually work depending on the underlying media protocol).
+
+
+get_state(self)
+Get current movie state.
+Returns:
+the current state of the media player (playing, paused, ...) See State.
+
+
+has_vout(self)
+How many video outputs does this media player have?
+Returns:
+the number of video outputs.
+
+
+is_seekable(self)
+Is this media player seekable?
+Returns:
+true if the media player can seek \libvlc_return_bool.
+
+
+can_pause(self)
+Can this media player be paused?
+Returns:
+true if the media player can pause \libvlc_return_bool.
+
+
+program_scrambled(self)
+Check if the current program is scrambled.
+Returns:
+true if the current program is scrambled \libvlc_return_bool.
+Version: LibVLC 2.2.0 or later.
+
+
+navigate(self, navigate)
+Navigate through DVD Menu.
+Parameters:
+navigate - the Navigation mode.
+Version: libVLC 2.0.0 or later.
+
+
+set_video_title_display(self, position, timeout)
+Set if, and how, the video title will be shown when media is played.
+Parameters:
+position - position at which to display the title, or libvlc_position_disable to prevent the title from being displayed.
+timeout - title display timeout in milliseconds (ignored if libvlc_position_disable).
+Version: libVLC 2.1.0 or later.
+
+
+add_slave(self, i_type, psz_uri, b_select)
+Add a slave to the current media player.
+Parameters:
+i_type - subtitle or audio.
+psz_uri - Uri of the slave (should contain a valid scheme).
+b_select - True if this slave should be selected when it's loaded.
+Returns:
+0 on success, -1 on error.
+Note: If the player is playing, the slave will be added directly. This call will also update the slave list of the attached Media.
+
+
+toggle_fullscreen(self)
+Toggle fullscreen status on non-embedded video outputs.
+Warning: The same limitations applies to this function as to set_fullscreen().
+
+
+set_fullscreen(self, b_fullscreen)
+Enable or disable fullscreen.
+Parameters:
+b_fullscreen - boolean for fullscreen status.
+Warning: With most window managers, only a top-level windows can be in full-screen mode. Hence, this function will not operate properly if set_xwindow() was used to embed the video in a non-top-level window. In that case, the embedding window must be reparented to the root window before fullscreen mode is enabled. You will want to reparent it back to its normal parent when disabling fullscreen.
+
+
+get_fullscreen(self)
+Get current fullscreen status.
+Returns:
+the fullscreen status (boolean) \libvlc_return_bool.
+
+
+video_set_key_input(self, on)
+Enable or disable key press events handling, according to the LibVLC hotkeys configuration. By default and for historical reasons, keyboard events are handled by the LibVLC video widget.
+Parameters:
+on - true to handle key press events, false to ignore them.
+Note: On X11, there can be only one subscriber for key press and mouse click events per window. If your application has subscribed to those events for the X window ID of the video widget, then LibVLC will not be able to handle key presses and mouse clicks in any case.
+Warning: This function is only implemented for X11 and Win32 at the moment.
+
+
+video_set_mouse_input(self, on)
+Enable or disable mouse click events handling. By default, those events are handled. This is needed for DVD menus to work, as well as a few video filters such as "puzzle". See video_set_key_input().
+Parameters:
+on - true to handle mouse click events, false to ignore them.
+Warning: This function is only implemented for X11 and Win32 at the moment.
+
+
+video_get_scale(self)
+Get the current video scaling factor. See also video_set_scale().
+Returns:
+the currently configured zoom factor, or 0. if the video is set to fit to the output window/drawable automatically.
+
+
+video_set_scale(self, f_factor)
+Set the video scaling factor. That is the ratio of the number of pixels on screen to the number of pixels in the original decoded video in each dimension. Zero is a special value; it will adjust the video to the output window/drawable (in windowed mode) or the entire screen. Note that not all video outputs support scaling.
+Parameters:
+f_factor - the scaling factor, or zero.
+
+
+video_get_aspect_ratio(self)
+Get current video aspect ratio.
+Returns:
+the video aspect ratio or None if unspecified (the result must be released with free() or free()).
+
+
+video_set_aspect_ratio(self, psz_aspect)
+Set new video aspect ratio.
+Parameters:
+psz_aspect - new video aspect-ratio or None to reset to default @note Invalid aspect ratios are ignored.
+
+
+video_update_viewpoint(self, p_viewpoint, b_absolute)
+Update the video viewpoint information.
+Parameters:
+p_viewpoint - video viewpoint allocated via video_new_viewpoint().
+b_absolute - if true replace the old viewpoint with the new one. If false, increase/decrease it.
+Returns:
+-1 in case of error, 0 otherwise @note the values are set asynchronously, it will be used by the next frame displayed.
+Note: It is safe to call this function before the media player is started.
+
+
+video_get_spu(self)
+Get current video subtitle.
+Returns:
+the video subtitle selected, or -1 if none.
+
+
+video_get_spu_count(self)
+Get the number of available video subtitles.
+Returns:
+the number of available video subtitles.
+
+
+video_set_spu(self, i_spu)
+Set new video subtitle.
+Parameters:
+i_spu - video subtitle track to select (i_id from track description).
+Returns:
+0 on success, -1 if out of range.
+
+
+video_get_spu_delay(self)
+Get the current subtitle delay. Positive values means subtitles are being displayed later, negative values earlier.
+Returns:
+time (in microseconds) the display of subtitles is being delayed.
+
+
+video_set_spu_delay(self, i_delay)
+Set the subtitle delay. This affects the timing of when the subtitle will be displayed. Positive values result in subtitles being displayed later, while negative values will result in subtitles being displayed earlier. The subtitle delay will be reset to zero each time the media changes.
+Parameters:
+i_delay - time (in microseconds) the display of subtitles should be delayed.
+Returns:
+0 on success, -1 on error.
+
+
+video_get_crop_geometry(self)
+Get current crop filter geometry.
+Returns:
+the crop filter geometry or None if unset.
+
+
+video_set_crop_geometry(self, psz_geometry)
+Set new crop filter geometry.
+Parameters:
+psz_geometry - new crop filter geometry (None to unset).
+
+
+video_get_teletext(self)
+Get current teletext page requested or 0 if it's disabled. Teletext is disabled by default, call video_set_teletext() to enable it.
+Returns:
+the current teletext page requested.
+
+
+video_set_teletext(self, i_page)
+Set new teletext page to retrieve. This function can also be used to send a teletext key.
+Parameters:
+i_page - teletex page number requested. This value can be 0 to disable teletext, a number in the range ]0;1000[ to show the requested page, or a ef TeletextKey. 100 is the default teletext page.
+
+
+video_get_track_count(self)
+Get number of available video tracks.
+Returns:
+the number of available video tracks (int).
+
+
+video_get_track(self)
+Get current video track.
+Returns:
+the video track ID (int) or -1 if no active input.
+
+
+video_set_track(self, i_track)
+Set video track.
+Parameters:
+i_track - the track ID (i_id field from track description).
+Returns:
+0 on success, -1 if out of range.
+
+
+video_take_snapshot(self, num, psz_filepath, i_width, i_height)
+Take a snapshot of the current video window. If i_width AND i_height is 0, original size is used. If i_width XOR i_height is 0, original aspect-ratio is preserved.
+Parameters:
+num - number of video output (typically 0 for the first/only one).
+psz_filepath - the path of a file or a folder to save the screenshot into.
+i_width - the snapshot's width.
+i_height - the snapshot's height.
+Returns:
+0 on success, -1 if the video was not found.
+
+
+video_set_deinterlace(self, psz_mode)
+Enable or disable deinterlace filter.
+Parameters:
+psz_mode - type of deinterlace filter, None to disable.
+
+
+video_get_marquee_int(self, option)
+Get an integer marquee option value.
+Parameters:
+option - marq option to get See libvlc_video_marquee_int_option_t.
+
+
+video_get_marquee_string(self, option)
+Get a string marquee option value.
+Parameters:
+option - marq option to get See libvlc_video_marquee_string_option_t.
+
+
+video_set_marquee_int(self, option, i_val)
+Enable, disable or set an integer marquee option Setting libvlc_marquee_Enable has the side effect of enabling (arg !0) or disabling (arg 0) the marq filter.
+Parameters:
+option - marq option to set See libvlc_video_marquee_int_option_t.
+i_val - marq option value.
+
+
+video_set_marquee_string(self, option, psz_text)
+Set a marquee string option.
+Parameters:
+option - marq option to set See libvlc_video_marquee_string_option_t.
+psz_text - marq option value.
+
+
+video_get_logo_int(self, option)
+Get integer logo option.
+Parameters:
+option - logo option to get, values of VideoLogoOption.
+
+
+video_set_logo_int(self, option, value)
+Set logo option as integer. Options that take a different type value are ignored. Passing libvlc_logo_enable as option value has the side effect of starting (arg !0) or stopping (arg 0) the logo filter.
+Parameters:
+option - logo option to set, values of VideoLogoOption.
+value - logo option value.
+
+
+video_set_logo_string(self, option, psz_value)
+Set logo option as string. Options that take a different type value are ignored.
+Parameters:
+option - logo option to set, values of VideoLogoOption.
+psz_value - logo option value.
+
+
+video_get_adjust_int(self, option)
+Get integer adjust option.
+Parameters:
+option - adjust option to get, values of VideoAdjustOption.
+
+
+video_set_adjust_int(self, option, value)
+Set adjust option as integer. Options that take a different type value are ignored. Passing libvlc_adjust_enable as option value has the side effect of starting (arg !0) or stopping (arg 0) the adjust filter.
+Parameters:
+option - adust option to set, values of VideoAdjustOption.
+value - adjust option value.
+
+
+video_get_adjust_float(self, option)
+Get float adjust option.
+Parameters:
+option - adjust option to get, values of VideoAdjustOption.
+
+
+video_set_adjust_float(self, option, value)
+Set adjust option as float. Options that take a different type value are ignored.
+Parameters:
+option - adust option to set, values of VideoAdjustOption.
+value - adjust option value.
+
+
+audio_output_set(self, psz_name)
+Selects an audio output module.
+Parameters:
+psz_name - name of audio output, use psz_name of See AudioOutput.
+Returns:
+0 if function succeeded, -1 on error.
+Note: Any change will take be effect only after playback is stopped and restarted. Audio output cannot be changed while playing.
+
+
+audio_output_device_enum(self)
+Gets a list of potential audio output devices, See audio_output_device_set().
+Returns:
+A None-terminated linked list of potential audio output devices. It must be freed with audio_output_device_list_release().
+Notes:
+Not all audio outputs support enumerating devices. The audio output may be functional even if the list is empty (None).
+The list may not be exhaustive.
+Warning: Some audio output devices in the list might not actually work in some circumstances. By default, it is recommended to not specify any explicit audio device.
+
+
+audio_output_device_set(self, module, device_id)
+Configures an explicit audio output device. If the module paramater is None, audio output will be moved to the device specified by the device identifier string immediately. This is the recommended usage. A list of adequate potential device strings can be obtained with audio_output_device_enum(). However passing None is supported in LibVLC version 2.2.0 and later only; in earlier versions, this function would have no effects when the module parameter was None. If the module parameter is not None, the device parameter of the corresponding audio output, if it exists, will be set to the specified string. Note that some audio output modules do not have such a parameter (notably MMDevice and PulseAudio). A list of adequate potential device strings can be obtained with audio_output_device_list_get().
+Parameters:
+module - If None, current audio output module. if non-None, name of audio output module.
+device_id - device identifier string.
+Returns:
+Nothing. Errors are ignored (this is a design bug).
+Note: This function does not select the specified audio output plugin. audio_output_set() is used for that purpose.
+Warning: The syntax for the device parameter depends on the audio output. Some audio output modules require further parameters (e.g. a channels map in the case of ALSA).
+
+
+audio_output_device_get(self)
+Get the current audio output device identifier. This complements audio_output_device_set().
+Returns:
+the current audio output device identifier None if no device is selected or in case of error (the result must be released with free() or free()).
+Warning: The initial value for the current audio output device identifier may not be set or may be some unknown value. A LibVLC application should compare this value against the known device identifiers (e.g. those that were previously retrieved by a call to audio_output_device_enum or audio_output_device_list_get) to find the current audio output device. It is possible that the selected audio output device changes (an external change) without a call to audio_output_device_set. That may make this method unsuitable to use if a LibVLC application is attempting to track dynamic audio device changes as they happen.
+
+
+audio_get_mute(self)
+Get current mute status.
+Returns:
+the mute status (boolean) if defined, -1 if undefined/unapplicable.
+
+
+audio_set_mute(self, status)
+Set mute status.
+Parameters:
+status - If status is true then mute, otherwise unmute @warning This function does not always work. If there are no active audio playback stream, the mute status might not be available. If digital pass-through (S/PDIF, HDMI...) is in use, muting may be unapplicable. Also some audio output plugins do not support muting at all. @note To force silent playback, disable all audio tracks. This is more efficient and reliable than mute.
+
+
+audio_get_volume(self)
+Get current software audio volume.
+Returns:
+the software volume in percents (0 = mute, 100 = nominal / 0dB).
+
+
+audio_set_volume(self, i_volume)
+Set current software audio volume.
+Parameters:
+i_volume - the volume in percents (0 = mute, 100 = 0dB).
+Returns:
+0 if the volume was set, -1 if it was out of range.
+
+
+audio_get_track_count(self)
+Get number of available audio tracks.
+Returns:
+the number of available audio tracks (int), or -1 if unavailable.
+
+
+audio_get_track(self)
+Get current audio track.
+Returns:
+the audio track ID or -1 if no active input.
+
+
+audio_set_track(self, i_track)
+Set current audio track.
+Parameters:
+i_track - the track ID (i_id field from track description).
+Returns:
+0 on success, -1 on error.
+
+
+audio_get_channel(self)
+Get current audio channel.
+Returns:
+the audio channel See AudioOutputChannel.
+
+
+audio_set_channel(self, channel)
+Set current audio channel.
+Parameters:
+channel - the audio channel, See AudioOutputChannel.
+Returns:
+0 on success, -1 on error.
+
+
+audio_get_delay(self)
+Get current audio delay.
+Returns:
+the audio delay (microseconds).
+
+
+audio_set_delay(self, i_delay)
+Set current audio delay. The audio delay will be reset to zero each time the media changes.
+Parameters:
+i_delay - the audio delay (microseconds).
+Returns:
+0 on success, -1 on error.
+
+
+set_equalizer(self, p_equalizer)
+Apply new equalizer settings to a media player. The equalizer is first created by invoking audio_equalizer_new() or audio_equalizer_new_from_preset(). It is possible to apply new equalizer settings to a media player whether the media player is currently playing media or not. Invoking this method will immediately apply the new equalizer settings to the audio output of the currently playing media if there is any. If there is no currently playing media, the new equalizer settings will be applied later if and when new media is played. Equalizer settings will automatically be applied to subsequently played media. To disable the equalizer for a media player invoke this method passing None for the p_equalizer parameter. The media player does not keep a reference to the supplied equalizer so it is safe for an application to release the equalizer reference any time after this method returns.
+Parameters:
+p_equalizer - opaque equalizer handle, or None to disable the equalizer for this media player.
+Returns:
+zero on success, -1 on error.
+
+
+get_role(self)
+Gets the media role.
+Returns:
+the media player role ( ef libvlc_media_player_role_t).
+
+
+set_role(self, role)
+Sets the media role.
+Parameters:
+role - the media player role ( ef libvlc_media_player_role_t).
+Returns:
+0 on success, -1 on error.
