@@ -55,15 +55,17 @@ def Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi):
             #print("Spila Fuglahljóð nr:", fugl_nr)
             return fugl_nr
             break
-    fugl_nr += 1
+        fugl_nr += 1
     return -1
 
 
-def Spila_hljod(spilari):
+def Spila_hljod(spilari, fugl):
     if not spilari.is_playing():
+        spilari.stop()
         spilari.play()
+        print("Play:", fugl)
 
-
+        
         
 innganga_listi = [16, 18, 19, 21, 22, 23, 24, 26]
 GPIO.setup(innganga_listi, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -84,14 +86,20 @@ fugla_hljod = ["falki.ogg",
 vlc_spilarar = Stilla_vlc(fugla_hljod)
 
 
+
+var_ad_spila = -1
 try:
     print("Main Loop Byrjar.")
     while(True):
         #Prenta_innganga(innganga_listi)
         fugl_nr = Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi)
         if fugl_nr >= 0:
-            print("Spila Fuglahljóð nr:", fugl_nr)
-            Spila_hljod(vlc_spilarar[fugl_nr])
+            if fugl_nr != var_ad_spila:
+                #print("Spila Fuglahljóð nr:", fugl_nr)
+                Spila_hljod(vlc_spilarar[fugl_nr], fugla_hljod[fugl_nr])
+                var_ad_spila = fugl_nr
+        else:
+            var_ad_spila = -1
         time.sleep(0.2)
 except Exception as e:
     print("VILLA!", e)
