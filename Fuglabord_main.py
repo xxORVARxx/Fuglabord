@@ -20,12 +20,22 @@ import vlc
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
-    print("""Error importing RPi.GPIO! This is probably because you need superuser privileges.
-    You can achieve this by using 'sudo' to run your script""")
+    print("""Error importing RPi.GPIO! This is probably because you need 
+             superuser privileges. You can achieve this by using 'sudo' 
+             to run your script""")
     
 # Using the BOARD numbering system. This refers to the pin numbers on the P1 header of
 # the Raspberry Pi board.
 GPIO.setmode(GPIO.BOARD)
+
+
+def Stilla_vlc(fugla_hljod):
+    vlc_spilarar = []
+    for hljod in fugla_hljod:
+        print("VLC: ", vlc_spilarar.append(vlc.MediaPlayer(hljod)), hljod)
+    for spilari in vlc_spilarar:
+        spilari.audio_set_volume(100)
+    return vlc_spilarar
 
 
 def Prenta_innganga(innganga_listi):
@@ -41,14 +51,20 @@ def Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi):
         stada_skynjara.append(GPIO.input(inngangur))
     fugl_nr = 0
     for fugl in fugla_listi:
-        fugl_nr += 1
         if fugl == stada_skynjara:
             #print("Spila Fuglahljóð nr:", fugl_nr)
             return fugl_nr
             break
-    return 0
-    
-    
+    fugl_nr += 1
+    return -1
+
+
+def Spila_hljod(spilari):
+    if not spilari.is_playing():
+        spilari.play()
+
+
+        
 innganga_listi = [16, 18, 19, 21, 22, 23, 24, 26]
 GPIO.setup(innganga_listi, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # The GPIO-pins NEED to have 'pull-ups'!
@@ -59,8 +75,13 @@ GPIO.setup(innganga_listi, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 fugla_listi = [[0,0,0,0,0,0,0,0],  # Fálki.
                [0,1,0,1,0,1,0,1],  # Stokkönd.
-               [1,0,1,0,1,0,1,0],  # Auðnutitlingur.
+               [1,0,1,0,1,0,1,0],  # Auðnutittlingur.
                [1,1,1,1,1,1,1,1]]  # Stelkur.
+fugla_hljod = ["falki.ogg",
+               "stokkond.ogg",
+               "audnutittlingur.ogg",
+               "stelkur.ogg"]
+vlc_spilarar = Stilla_vlc(fugla_hljod)
 
 
 try:
@@ -68,8 +89,9 @@ try:
     while(True):
         #Prenta_innganga(innganga_listi)
         fugl_nr = Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi)
-        if fugl_nr > 0:
+        if fugl_nr >= 0:
             print("Spila Fuglahljóð nr:", fugl_nr)
+            Spila_hljod(vlc_spilarar[fugl_nr])
         time.sleep(0.2)
 except Exception as e:
     print("VILLA!", e)
