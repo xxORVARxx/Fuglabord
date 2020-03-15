@@ -11,7 +11,7 @@
 import math
 import time
 
-# Import the python-vlc module
+# Import the python-vlc module:
 # https://www.olivieraubert.net/vlc/python-ctypes/doc/
 import vlc
 
@@ -24,8 +24,8 @@ except RuntimeError:
              superuser privileges. You can achieve this by using 'sudo' 
              to run your script""")
     
-# Using the BOARD numbering system. This refers to the pin numbers on the P1 header of
-# the Raspberry Pi board.
+# Using the BOARD numbering system. This refers to the pin numbers on
+# the P1 header of the Raspberry Pi board.
 GPIO.setmode(GPIO.BOARD)
 
 
@@ -65,8 +65,8 @@ def Spila_hljod(spilari, fugl):
         spilari.play()
         print("Play:", fugl)
 
-        
-        
+
+
 innganga_listi = [16, 18, 19, 21, 22, 23, 24, 26]
 GPIO.setup(innganga_listi, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # The GPIO-pins NEED to have 'pull-ups'!
@@ -84,7 +84,6 @@ fugla_hljod = ["falki.ogg",
                "audnutittlingur.ogg",
                "stelkur.ogg"]
 vlc_spilarar = Stilla_vlc(fugla_hljod)
-
 
 
 var_ad_spila = -1
