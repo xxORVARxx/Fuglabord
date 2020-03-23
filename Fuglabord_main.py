@@ -9,6 +9,7 @@
 
 ### Import Modules:
 import sys
+import time
 # Import the python-vlc module:
 # https://www.olivieraubert.net/vlc/python-ctypes/doc/
 import vlc
@@ -100,6 +101,7 @@ fugla_hljod = [directory +"falki.ogg",
 vlc_spilarar = Stilla_vlc(fugla_hljod)
 
 
+time.sleep(5)
 var_ad_spila = -1
 try:
     time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())

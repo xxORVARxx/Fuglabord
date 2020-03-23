@@ -8,7 +8,7 @@ python_file="Fuglabord_main.py" # <------------- Python file name.
 logger_file="_logger_$(date +'%m_%y').txt" # <-- Logger file name. 
 
 script=`basename $0`
-directory="`dirname $0`/"
+directory="$1"
 echo "$(date +'%M:%H-%d.%m.%Y') | $script:  Allt Gott!  Kveiki á Python forriti." >> ${directory}${logger_file}
 while :; do
     python3 ${directory}${python_file} "$directory" >> ${directory}${logger_file} 2>&1
