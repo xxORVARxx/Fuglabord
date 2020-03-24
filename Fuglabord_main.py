@@ -2,8 +2,10 @@
 
 
 ###
-###  Til að kveikja á forrit:
-###  python3 ./Fuglabord_main.py "~/path/to/program/"
+###  Til að kveikja á forrit gerðu:
+###    python3 ./Fuglabord_main.py "~/path/to/program/directory/"
+###  Eða:
+###    ./Fuglabord_Launcher.sh "~/path/to/program/directory/"
 ###
 
 
@@ -18,16 +20,17 @@ import vlc
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
     print(time_string, """| Python:  Error importing RPi.GPIO! This 
                        is probably because you need superuser privileges.
                        You can achieve this by using 'sudo' to run 
                        your script""", flush=True)
 # Command-line argument:
+directory = "./"
 try:
     directory = str(sys.argv[1])
 except:
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
     print(time_string, """| Python:  Aðvörun!  Vantar "command-line argument"
                        sem á að inni halda staðsetninguna á forritinu. Til að 
                        kveikja á forrit:  
@@ -43,9 +46,10 @@ GPIO.setmode(GPIO.BOARD)
 def Stilla_vlc(fugla_hljod):
     vlc_spilarar = []
     for hljod in fugla_hljod:
-        time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-        print(time_string, "| Python:  VLC: ",
-              vlc_spilarar.append(vlc.MediaPlayer(hljod)), hljod)
+        time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+        print(time_string, '| Python:  Sæki hljóðfæl: "'+ hljod +'"', flush=True)
+        print("                 | Python:  VLC: Villur og Viðvaranir:",
+              vlc_spilarar.append(vlc.MediaPlayer(hljod)), flush=True)
     for spilari in vlc_spilarar:
         spilari.audio_set_volume(100)
     return vlc_spilarar
@@ -55,8 +59,8 @@ def Prenta_innganga(innganga_listi):
     stada_skynjara = []
     for inngangur in innganga_listi:
         stada_skynjara.append(GPIO.input(inngangur))
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-    print(time_string, "| Python:  Stada Skynjara:", stada_skynjara)
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+    print(time_string, "| Python:  Stada Skynjara:", stada_skynjara, flush=True)
 
 
 def Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi):
@@ -77,8 +81,8 @@ def Spila_hljod(spilari, fugl):
     if not spilari.is_playing():
         spilari.stop()
         spilari.play()
-        time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-        print(time_string, "| Python:  Play:", fugl)
+        time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+        print(time_string, "| Python:  Spila Hljóð:", fugl, flush=True)
 
 
 
@@ -104,8 +108,8 @@ vlc_spilarar = Stilla_vlc(fugla_hljod)
 time.sleep(5)
 var_ad_spila = -1
 try:
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-    print(time_string, "| Python:  Main Loop Byrjar.")
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+    print(time_string, "| Python:  Main-loop Byrjar.", flush=True)
     while(True):
         #Prenta_innganga(innganga_listi)
         fugl_nr = Bera_saman_fugla_og_skynjara(innganga_listi, fugla_listi)
@@ -118,9 +122,9 @@ try:
             var_ad_spila = -1
         time.sleep(0.2)
 except Exception as e:
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-    print(time_string, "| Python:  VILLA!", e)
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+    print(time_string, "| Python:  VILLA!", e, flush=True)
 finally:
     GPIO.cleanup()
-    time_string = time.strftime("%M:%H-%d.%m.%Y", time.localtime())
-    print(time_string, "| Python:  GPIO Cleanup done.")
+    time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
+    print(time_string, "| Python:  GPIO Cleanup done.", flush=True)
