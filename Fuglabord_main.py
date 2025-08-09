@@ -14,7 +14,15 @@ import sys
 import time
 # Import the python-vlc module:
 # https://www.olivieraubert.net/vlc/python-ctypes/doc/
+
 import vlc
+#vlc_player = vlc.Instance()
+# If you get error like this:
+# vlcpulse audio output error: PulseAudio server connection failure: Connection refused
+# Create VLC instance with ALSA audio output:
+vlc_player = vlc.Instance('--aout=alsa')
+#player = vlc_player.media_player_new(the.ogg)
+
 # Import the GPIO module and check to see if it is successful:
 # https://sourceforge.net/p/raspberry-gpio-python/wiki/Examples/
 try:
@@ -49,7 +57,7 @@ def Stilla_vlc(fugla_hljod):
         time_string = time.strftime("%d.%m.%Y-%H:%M", time.localtime())
         print(time_string, '| Python:  Sæki hljóðfæl: "'+ hljod +'"', flush=True)
         print("                 | Python:  VLC: Villur og Viðvaranir:",
-              vlc_spilarar.append(vlc.MediaPlayer(hljod)), flush=True)
+              vlc_spilarar.append(vlc_player.media_player_new(hljod)), flush=True)
     for spilari in vlc_spilarar:
         spilari.audio_set_volume(100)
     return vlc_spilarar
