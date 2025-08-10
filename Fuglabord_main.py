@@ -102,14 +102,14 @@ GPIO.setup(innganga_listi, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # NO 3V3 OR 5V ARE NEED FOR THE SENSORS AND SHOULD NOT BE CONNECTED!
 
 
-fugla_listi = [[0,0,0,0,0,0,0,0],  # Fálki.
-               [0,1,0,1,0,1,0,1],  # Stokkönd.
-               [1,0,1,0,1,0,1,0],  # Auðnutittlingur.
-               [1,1,1,1,1,1,1,1]]  # Stelkur.
-fugla_hljod = [directory +"falki.ogg",
-               directory +"stokkond.ogg",
+fugla_listi = [[0,0,0,0,0,0,0,0],  # Stelkur.
+               [0,1,0,1,0,1,0,1],  # Auðnutittlingur.
+               [1,0,1,0,1,0,1,0],  # Stokkönd.
+               [1,1,1,1,1,1,1,1]]  # Fálki.
+fugla_hljod = [directory +"stelkur.ogg",
                directory +"audnutittlingur.ogg",
-               directory +"stelkur.ogg"]
+               directory +"stokkond.ogg",
+               directory +"falki.ogg"]
 vlc_spilarar = Stilla_vlc(fugla_hljod)
 
 
